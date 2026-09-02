@@ -4,8 +4,6 @@ const jwt = require('jsonwebtoken');
 const { Resend } = require('resend');
 const pool = require('../config/db');
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-
 function getJwtSecret() {
   const secret = String(process.env.JWT_SECRET || '').trim();
   if (!secret) {
@@ -75,18 +73,22 @@ async function solicitarReset(req, res) {
   }
 
   try {
+    const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
     const [rows] = await pool.execute('SELECT id FROM usuarios WHERE email = ?', [email]);
 
     if (rows.length) {
+      if (!resend) {
+        throw new Error('RESEND_API_KEY no configurada.');
+      }
+
       const token = crypto.randomBytes(32).toString('hex');
       const expiraEn = new Date(Date.now() + 60 * 60 * 1000);
 
+      await enviarCorreoReset(resend, email, token);
       await pool.execute(
-        'UPDATE usuarios SET reset_token = ?, reset_token_expira = ? WHERE email = ?',
-        [token, expiraEn, email]
+        'UPDATE usuarios SET reset_token = ?, reset_token_expira = ? WHERE id = ?',
+        [token, expiraEn, rows[0].id]
       );
-
-      await enviarCorreoReset(email, token);
     }
 
     return res.status(200).json({
@@ -94,9 +96,7 @@ async function solicitarReset(req, res) {
     });
   } catch (error) {
     console.error('Error al solicitar reset de contraseña:', error);
-    return res.status(200).json({
-      message: 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.'
-    });
+    return res.status(503).json({ message: 'No se pudo enviar el correo de recuperación. Intenta más tarde.' });
   }
 }
 
@@ -136,15 +136,11 @@ async function resetPassword(req, res) {
   }
 }
 
-async function enviarCorreoReset(email, token) {
-  if (!resend) {
-    throw new Error('RESEND_API_KEY no configurada.');
-  }
-
-  const resetUrl = `${process.env.FRONTEND_URL || 'https://control-de-interes.onrender.com'}/reset-password.html?token=${token}`;
+async function enviarCorreoReset(resend, email, token) {
+  const resetUrl = `${process.env.FRONTEND_URL || 'https://control-de-interes.onrender.com'}/reset-password.html?token=${encodeURIComponent(token)}`;
 
   await resend.emails.send({
-    from: 'onboarding@resend.dev',
+    from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
     to: [email],
     subject: 'Restablece tu contraseña',
     html: `

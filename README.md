@@ -14,7 +14,15 @@ npm install
 cp .env.example .env
 ```
 
-Edite el archivo `.env` con tus credenciales de MySQL y un `JWT_SECRET` fuerte.
+Edita el archivo `.env` con tus credenciales de MySQL, un `JWT_SECRET` fuerte y las variables de Resend para habilitar recuperación de contraseña:
+
+```env
+RESEND_API_KEY=re_xxxxxxxxx
+RESEND_FROM_EMAIL=onboarding@resend.dev
+FRONTEND_URL=https://tu-dominio.com
+```
+
+En producción, configura estas variables en el proveedor de hosting. No las subas a GitHub.
 
 ## Base de datos
 
