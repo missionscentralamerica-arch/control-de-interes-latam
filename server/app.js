@@ -8,6 +8,7 @@ const personasRoutes = require('./routes/personas.routes');
 
 const app = express();
 
+app.set('trust proxy', 1);
 app.use(helmet());
 
 function getPublicRegistrationUrl(req) {
