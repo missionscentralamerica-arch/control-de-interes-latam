@@ -3,14 +3,15 @@ const PDFDocument = require('pdfkit');
 const path = require('path');
 
 const PDF_COLUMNS = [
-  { label: 'Nombre completo', width: 110 },
-  { label: 'Correo', width: 145 },
-  { label: 'Código postal', width: 65 },
-  { label: 'Edad', width: 40 },
-  { label: 'Evento / descripción', width: 140 },
-  { label: 'Reconciliación', width: 70 },
-  { label: 'Aceptar a Cristo', width: 70 },
-  { label: 'Fecha de registro', width: 65 }
+  { label: 'Nombre completo', width: 100 },
+  { label: 'Correo', width: 130 },
+  { label: 'Teléfono', width: 90 },
+  { label: 'Código postal', width: 60 },
+  { label: 'Edad', width: 35 },
+  { label: 'Evento / descripción', width: 120 },
+  { label: 'Reconciliación', width: 65 },
+  { label: 'Aceptar a Cristo', width: 65 },
+  { label: 'Fecha de registro', width: 55 }
 ];
 
 function toPdfText(value) {
@@ -65,6 +66,7 @@ function drawTableRow(doc, row, y, alternate) {
   const values = [
     toPdfText(row.nombre_completo),
     toPdfText(row.correo),
+    toPdfText(row.telefono),
     toPdfText(row.codigo_postal),
     toPdfText(row.edad),
     truncateText(row.evento_descripcion),
@@ -97,7 +99,7 @@ function buildPersonasQuery(filters) {
   }
 
   let query = `
-    SELECT p.id, p.nombre_completo, p.correo, p.codigo_postal, p.edad, p.evento_descripcion, p.reconciliacion, p.aceptar_cristo, p.fecha_registro
+    SELECT p.id, p.nombre_completo, p.correo, p.telefono, p.codigo_postal, p.edad, p.evento_descripcion, p.reconciliacion, p.aceptar_cristo, p.fecha_registro
     FROM personas p
   `;
 

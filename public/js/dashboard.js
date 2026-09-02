@@ -33,7 +33,7 @@ function parseJwt(tokenValue) {
 
 function renderRows(rows) {
   if (!rows.length) {
-    tableBody.innerHTML = '<tr><td colspan="8">No hay registros para los filtros seleccionados.</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="9">No hay registros para los filtros seleccionados.</td></tr>';
     return;
   }
 
@@ -41,6 +41,7 @@ function renderRows(rows) {
     <tr>
       <td>${row.nombre_completo}</td>
       <td>${row.correo}</td>
+      <td>${row.telefono || '-'}</td>
       <td>${row.codigo_postal}</td>
       <td>${row.edad}</td>
       <td>${row.evento_descripcion || '-'}</td>
