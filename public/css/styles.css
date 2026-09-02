@@ -157,6 +157,42 @@ input:focus, select:focus, textarea:focus {
   background: #ffffff;
 }
 
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 90px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  border: 0;
+  padding: 6px 8px;
+  background: transparent;
+  color: var(--blue);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.password-toggle:hover { color: var(--blue-deep); }
+
+.password-strength {
+  min-height: 1.2em;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.password-strength[data-strength="1"] { color: var(--ember); }
+.password-strength[data-strength="2"] { color: var(--gold); }
+.password-strength[data-strength="3"] { color: var(--success); }
+
 textarea { resize: vertical; }
 
 .full-width { grid-column: 1 / -1; }
