@@ -6,11 +6,23 @@ const pool = require('../config/db');
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
+function getJwtSecret() {
+  const secret = String(process.env.JWT_SECRET || '').trim();
+  if (!secret) {
+    throw new Error('JWT_SECRET no está configurado.');
+  }
+  return secret;
+}
+
 async function login(req, res) {
   const { email, password } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ message: 'Email y contraseña son obligatorios.' });
+  }
+
+  if (typeof email !== 'string' || typeof password !== 'string' || email.length > 254 || password.length > 200) {
+    return res.status(400).json({ message: 'Los datos de acceso no son válidos.' });
   }
 
   try {
@@ -36,7 +48,7 @@ async function login(req, res) {
         nombre: usuario.nombre,
         email: usuario.email
       },
-      process.env.JWT_SECRET || 'dev_secret',
+      getJwtSecret(),
       { expiresIn: '8h' }
     );
 
@@ -90,10 +102,14 @@ async function solicitarReset(req, res) {
 
 async function resetPassword(req, res) {
   const token = String(req.body?.token || '').trim();
-  const nuevaPassword = String(req.body?.nuevaPassword || '').trim();
+  const nuevaPassword = String(req.body?.nuevaPassword || '');
 
   if (!token || !nuevaPassword) {
     return res.status(400).json({ message: 'Token y contraseña son obligatorios.' });
+  }
+
+  if (nuevaPassword.length < 8 || nuevaPassword.length > 200) {
+    return res.status(400).json({ message: 'La contraseña debe tener entre 8 y 200 caracteres.' });
   }
 
   try {

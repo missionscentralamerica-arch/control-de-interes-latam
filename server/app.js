@@ -1,11 +1,14 @@
 const express = require('express');
 const path = require('path');
 const QRCode = require('qrcode');
+const helmet = require('helmet');
 const authRoutes = require('./routes/auth.routes');
 const registroRoutes = require('./routes/registro.routes');
 const personasRoutes = require('./routes/personas.routes');
 
 const app = express();
+
+app.use(helmet());
 
 function getPublicRegistrationUrl(req) {
   return process.env.PUBLIC_REGISTRATION_URL || `https://${req.get('host') || 'control-de-interes.onrender.com'}/registro.html`;
@@ -39,8 +42,8 @@ app.get('/api/qr', async (req, res) => {
   }
 });
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 app.use('/img', express.static(path.join(__dirname, '..', 'img')));
 app.use(express.static(path.join(__dirname, '..', 'public')));
 

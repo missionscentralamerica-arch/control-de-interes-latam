@@ -31,6 +31,16 @@ function parseJwt(tokenValue) {
   }
 }
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, (character) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  }[character]));
+}
+
 function renderRows(rows) {
   if (!rows.length) {
     tableBody.innerHTML = '<tr><td colspan="9">No hay registros para los filtros seleccionados.</td></tr>';
@@ -39,15 +49,15 @@ function renderRows(rows) {
 
   tableBody.innerHTML = rows.map((row) => `
     <tr>
-      <td>${row.nombre_completo}</td>
-      <td>${row.correo}</td>
-      <td>${row.telefono || '-'}</td>
-      <td>${row.codigo_postal}</td>
-      <td>${row.edad}</td>
-      <td>${row.evento_descripcion || '-'}</td>
+      <td>${escapeHtml(row.nombre_completo)}</td>
+      <td>${escapeHtml(row.correo)}</td>
+      <td>${escapeHtml(row.telefono || '-')}</td>
+      <td>${escapeHtml(row.codigo_postal)}</td>
+      <td>${escapeHtml(row.edad)}</td>
+      <td>${escapeHtml(row.evento_descripcion || '-')}</td>
       <td>${row.reconciliacion ? '✓' : ''}</td>
       <td>${row.aceptar_cristo ? '✓' : ''}</td>
-      <td>${new Date(row.fecha_registro).toLocaleString('es-MX')}</td>
+      <td>${escapeHtml(new Date(row.fecha_registro).toLocaleString('es-MX'))}</td>
     </tr>
   `).join('');
 }

@@ -10,7 +10,12 @@ function authenticateToken(req, res, next) {
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret');
+    const secret = String(process.env.JWT_SECRET || '').trim();
+    if (!secret) {
+      return res.status(503).json({ message: 'La autenticación no está configurada.' });
+    }
+
+    const decoded = jwt.verify(token, secret);
     req.user = decoded;
     return next();
   } catch (error) {
