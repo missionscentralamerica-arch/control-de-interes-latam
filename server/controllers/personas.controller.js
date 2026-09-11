@@ -9,6 +9,8 @@ const PDF_COLUMNS = [
   { label: 'Código postal', width: 60 },
   { label: 'Edad', width: 35 },
   { label: 'Evento / descripción', width: 120 },
+  { label: 'Iglesia', width: 80 },
+  { label: 'Voluntario', width: 80 },
   { label: 'Reconciliación', width: 65 },
   { label: 'Aceptar a Cristo', width: 65 },
   { label: 'Fecha de registro', width: 55 }
@@ -70,6 +72,8 @@ function drawTableRow(doc, row, y, alternate) {
     toPdfText(row.codigo_postal),
     toPdfText(row.edad),
     truncateText(row.evento_descripcion),
+    toPdfText(row.iglesia),
+    toPdfText(row.voluntario),
     row.reconciliacion ? 'Sí' : 'No',
     row.aceptar_cristo ? 'Sí' : 'No',
     formatDate(row.fecha_registro)
@@ -84,7 +88,7 @@ function drawTableRow(doc, row, y, alternate) {
   });
 }
 
-function buildPersonasQuery(filters) {
+function buildPersonasQuery(filters = {}) {
   const conditions = [];
   const values = [];
 
@@ -98,8 +102,33 @@ function buildPersonasQuery(filters) {
     values.push(filters.hasta);
   }
 
+  if (filters.codigo_postal) {
+    conditions.push('LOWER(p.codigo_postal) = LOWER(?)');
+    values.push(String(filters.codigo_postal).trim());
+  }
+
+  if (filters.reconciliacion !== undefined && filters.reconciliacion !== '') {
+    conditions.push('p.reconciliacion = ?');
+    values.push(filters.reconciliacion === 'true' ? 1 : 0);
+  }
+
+  if (filters.aceptar_cristo !== undefined && filters.aceptar_cristo !== '') {
+    conditions.push('p.aceptar_cristo = ?');
+    values.push(filters.aceptar_cristo === 'true' ? 1 : 0);
+  }
+
+  if (filters.iglesia) {
+    conditions.push('LOWER(p.iglesia) LIKE LOWER(?)');
+    values.push(`%${String(filters.iglesia).trim()}%`);
+  }
+
+  if (filters.voluntario) {
+    conditions.push('LOWER(p.voluntario) LIKE LOWER(?)');
+    values.push(`%${String(filters.voluntario).trim()}%`);
+  }
+
   let query = `
-    SELECT p.id, p.nombre_completo, p.correo, p.telefono, p.codigo_postal, p.edad, p.evento_descripcion, p.reconciliacion, p.aceptar_cristo, p.fecha_registro
+    SELECT p.id, p.nombre_completo, p.correo, p.telefono, p.codigo_postal, p.edad, p.evento_descripcion, p.iglesia, p.voluntario, p.reconciliacion, p.aceptar_cristo, p.fecha_registro
     FROM personas p
   `;
 
@@ -113,10 +142,8 @@ function buildPersonasQuery(filters) {
 }
 
 async function getPersonas(req, res) {
-  const { desde, hasta } = req.query;
-
   try {
-    const { query, values } = buildPersonasQuery({ desde, hasta });
+    const { query, values } = buildPersonasQuery(req.query);
     const [rows] = await pool.execute(query, values);
 
     return res.status(200).json(rows);
@@ -127,10 +154,8 @@ async function getPersonas(req, res) {
 }
 
 async function exportPersonas(req, res) {
-  const { desde, hasta } = req.query;
-
   try {
-    const { query, values } = buildPersonasQuery({ desde, hasta });
+    const { query, values } = buildPersonasQuery(req.query);
     const [rows] = await pool.execute(query, values);
 
     const generatedDate = new Date().toISOString().slice(0, 10);

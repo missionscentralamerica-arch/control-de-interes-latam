@@ -2,6 +2,11 @@ const token = sessionStorage.getItem('jwt');
 const tableBody = document.querySelector('#personasTableBody');
 const desde = document.querySelector('#desde');
 const hasta = document.querySelector('#hasta');
+const codigoPostal = document.querySelector('#codigoPostal');
+const reconciliacion = document.querySelector('#reconciliacion');
+const aceptarCristo = document.querySelector('#aceptarCristo');
+const iglesia = document.querySelector('#iglesia');
+const voluntario = document.querySelector('#voluntario');
 const mensaje = document.querySelector('#mensaje');
 const userLabel = document.querySelector('#userLabel');
 const exportBtn = document.querySelector('#exportBtn');
@@ -43,7 +48,7 @@ function escapeHtml(value) {
 
 function renderRows(rows) {
   if (!rows.length) {
-    tableBody.innerHTML = '<tr><td colspan="9">No hay registros para los filtros seleccionados.</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="11">No hay registros para los filtros seleccionados.</td></tr>';
     return;
   }
 
@@ -55,6 +60,8 @@ function renderRows(rows) {
       <td>${escapeHtml(row.codigo_postal)}</td>
       <td>${escapeHtml(row.edad)}</td>
       <td>${escapeHtml(row.evento_descripcion || '-')}</td>
+      <td>${escapeHtml(row.iglesia || '-')}</td>
+      <td>${escapeHtml(row.voluntario || '-')}</td>
       <td>${row.reconciliacion ? '✓' : ''}</td>
       <td>${row.aceptar_cristo ? '✓' : ''}</td>
       <td>${escapeHtml(new Date(row.fecha_registro).toLocaleString('es-MX'))}</td>
@@ -66,6 +73,11 @@ async function fetchPersonas() {
   const params = new URLSearchParams();
   if (desde.value) params.set('desde', desde.value);
   if (hasta.value) params.set('hasta', hasta.value);
+  if (codigoPostal.value) params.set('codigo_postal', codigoPostal.value);
+  if (reconciliacion.value) params.set('reconciliacion', reconciliacion.value);
+  if (aceptarCristo.value) params.set('aceptar_cristo', aceptarCristo.value);
+  if (iglesia.value) params.set('iglesia', iglesia.value);
+  if (voluntario.value) params.set('voluntario', voluntario.value);
 
   try {
     const response = await fetch(`/api/personas?${params.toString()}`, {
@@ -104,6 +116,11 @@ exportBtn.addEventListener('click', async () => {
   const params = new URLSearchParams();
   if (desde.value) params.set('desde', desde.value);
   if (hasta.value) params.set('hasta', hasta.value);
+  if (codigoPostal.value) params.set('codigo_postal', codigoPostal.value);
+  if (reconciliacion.value) params.set('reconciliacion', reconciliacion.value);
+  if (aceptarCristo.value) params.set('aceptar_cristo', aceptarCristo.value);
+  if (iglesia.value) params.set('iglesia', iglesia.value);
+  if (voluntario.value) params.set('voluntario', voluntario.value);
 
   try {
     const response = await fetch(`/api/personas/export?${params.toString()}`, {

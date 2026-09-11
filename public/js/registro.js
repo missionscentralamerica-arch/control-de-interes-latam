@@ -23,6 +23,8 @@ form.addEventListener('submit', async (event) => {
   const formData = new FormData(form);
   const payload = Object.fromEntries(formData.entries());
   payload.edad = Number(formData.get('edad'));
+  payload.iglesia = String(formData.get('iglesia') || '').trim();
+  payload.voluntario = String(formData.get('voluntario') || '').trim();
   payload.reconciliacion = formData.has('reconciliacion');
   payload.aceptar_cristo = formData.has('aceptar_cristo');
 

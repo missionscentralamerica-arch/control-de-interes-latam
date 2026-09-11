@@ -23,12 +23,14 @@ const registroRules = [
     .withMessage('El teléfono no tiene un formato válido.'),
   body('codigo_postal').trim().notEmpty().withMessage('El código postal es obligatorio.'),
   body('edad').isInt({ min: 1, max: 120 }).withMessage('La edad debe estar entre 1 y 120 años.'),
+  body('iglesia').optional({ checkFalsy: true }).trim().isLength({ max: 150 }).withMessage('La iglesia no puede superar los 150 caracteres.'),
+  body('voluntario').optional({ checkFalsy: true }).trim().isLength({ max: 150 }).withMessage('El voluntario no puede superar los 150 caracteres.'),
   body('reconciliacion').optional().isBoolean().withMessage('El valor de reconciliación debe ser verdadero o falso.'),
   body('aceptar_cristo').optional().isBoolean().withMessage('El valor de aceptar a Cristo debe ser verdadero o falso.')
 ];
 
 async function registrarPersona(req, res) {
-  const { nombre_completo, correo, telefono, codigo_postal, edad, evento_descripcion, reconciliacion, aceptar_cristo } = req.body;
+  const { nombre_completo, correo, telefono, codigo_postal, edad, evento_descripcion, iglesia, voluntario, reconciliacion, aceptar_cristo } = req.body;
 
   const nombre = String(nombre_completo || '').trim();
   const correoNormalizado = String(correo || '').trim().toLowerCase();
@@ -36,6 +38,8 @@ async function registrarPersona(req, res) {
   const codigoPostal = String(codigo_postal || '').trim();
   const edadNumerica = Number(edad);
   const descripcion = String(evento_descripcion || '').trim();
+  const iglesiaNombre = String(iglesia || '').trim();
+  const voluntarioNombre = String(voluntario || '').trim();
   const reconciliacionBool = String(reconciliacion) === 'true' || reconciliacion === true;
   const aceptarCristoBool = String(aceptar_cristo) === 'true' || aceptar_cristo === true;
 
@@ -58,9 +62,9 @@ async function registrarPersona(req, res) {
 
   try {
     await pool.execute(
-      `INSERT INTO personas (nombre_completo, correo, telefono, codigo_postal, edad, evento_descripcion, reconciliacion, aceptar_cristo)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [nombre, correoNormalizado, telefonoNormalizado, codigoPostal, edadNumerica, descripcion || null, reconciliacionBool, aceptarCristoBool]
+      `INSERT INTO personas (nombre_completo, correo, telefono, codigo_postal, edad, evento_descripcion, iglesia, voluntario, reconciliacion, aceptar_cristo)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
+      [nombre, correoNormalizado, telefonoNormalizado, codigoPostal, edadNumerica, descripcion || null, iglesiaNombre || null, voluntarioNombre || null, reconciliacionBool, aceptarCristoBool]
     );
 
     return res.status(201).json({ message: '¡Gracias, tu información fue registrada!' });
