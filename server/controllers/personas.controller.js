@@ -1,19 +1,21 @@
 const pool = require('../config/db');
 const PDFDocument = require('pdfkit');
 const path = require('path');
+const { estadosPermitidos } = require('../config/estados');
 
 const PDF_COLUMNS = [
-  { label: 'Nombre completo', width: 100 },
-  { label: 'Correo', width: 130 },
-  { label: 'Teléfono', width: 90 },
-  { label: 'Código postal', width: 60 },
-  { label: 'Edad', width: 35 },
-  { label: 'Evento / descripción', width: 120 },
-  { label: 'Iglesia', width: 80 },
-  { label: 'Voluntario', width: 80 },
-  { label: 'Reconciliación', width: 65 },
-  { label: 'Aceptar a Cristo', width: 65 },
-  { label: 'Fecha de registro', width: 55 }
+  { label: 'Nombre completo', width: 70 },
+  { label: 'Correo', width: 100 },
+  { label: 'Teléfono', width: 60 },
+  { label: 'Código postal', width: 45 },
+  { label: 'Edad', width: 25 },
+  { label: 'Evento / descripción', width: 75 },
+  { label: 'Iglesia', width: 50 },
+  { label: 'Voluntario', width: 50 },
+  { label: 'Reconciliación', width: 40 },
+  { label: 'Aceptar a Cristo', width: 40 },
+  { label: 'Estado actual', width: 80 },
+  { label: 'Fecha de registro', width: 85 }
 ];
 
 function toPdfText(value) {
@@ -76,6 +78,7 @@ function drawTableRow(doc, row, y, alternate) {
     toPdfText(row.voluntario),
     row.reconciliacion ? 'Sí' : 'No',
     row.aceptar_cristo ? 'Sí' : 'No',
+    truncateText(row.estado_actual, 32),
     formatDate(row.fecha_registro)
   ];
   let x = 36;
@@ -127,8 +130,13 @@ function buildPersonasQuery(filters = {}) {
     values.push(`%${String(filters.voluntario).trim()}%`);
   }
 
+  if (filters.estado) {
+    conditions.push('p.estado_actual = ?');
+    values.push(String(filters.estado).trim());
+  }
+
   let query = `
-    SELECT p.id, p.nombre_completo, p.correo, p.telefono, p.codigo_postal, p.edad, p.evento_descripcion, p.iglesia, p.voluntario, p.reconciliacion, p.aceptar_cristo, p.fecha_registro
+    SELECT p.id, p.nombre_completo, p.correo, p.telefono, p.codigo_postal, p.edad, p.evento_descripcion, p.iglesia, p.voluntario, p.reconciliacion, p.aceptar_cristo, p.estado_actual, p.fecha_registro
     FROM personas p
   `;
 
@@ -139,6 +147,95 @@ function buildPersonasQuery(filters = {}) {
   query += ' ORDER BY p.fecha_registro DESC';
 
   return { query, values };
+}
+
+async function updateEstado(req, res) {
+  const personaId = Number(req.params.id);
+  const estado = String(req.body?.estado || '').trim();
+  const nota = String(req.body?.nota || '').trim() || null;
+
+  if (!Number.isInteger(personaId) || personaId < 1) {
+    return res.status(400).json({ message: 'El identificador de la persona no es válido.' });
+  }
+
+  if (!estadosPermitidos.includes(estado)) {
+    return res.status(400).json({ message: 'El estado seleccionado no es válido.' });
+  }
+
+  if (nota && nota.length > 5000) {
+    return res.status(400).json({ message: 'La nota no puede superar los 5000 caracteres.' });
+  }
+
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [personas] = await connection.execute(
+      'SELECT id FROM personas WHERE id = ? FOR UPDATE',
+      [personaId]
+    );
+
+    if (!personas.length) {
+      await connection.rollback();
+      return res.status(404).json({ message: 'La persona no existe.' });
+    }
+
+    await connection.execute(
+      'UPDATE personas SET estado_actual = ? WHERE id = ?',
+      [estado, personaId]
+    );
+    await connection.execute(
+      'INSERT INTO estado_historial (persona_id, estado, nota) VALUES (?, ?, ?)',
+      [personaId, estado, nota]
+    );
+
+    const [updatedRows] = await connection.execute(
+      `SELECT id, nombre_completo, correo, telefono, codigo_postal, edad, evento_descripcion,
+              iglesia, voluntario, reconciliacion, aceptar_cristo, estado_actual, fecha_registro
+       FROM personas
+       WHERE id = ?`,
+      [personaId]
+    );
+
+    await connection.commit();
+    return res.status(200).json(updatedRows[0]);
+  } catch (error) {
+    await connection.rollback();
+    console.error(error);
+    return res.status(500).json({ message: 'No se pudo actualizar el estado.' });
+  } finally {
+    connection.release();
+  }
+}
+
+async function getEstadoHistorial(req, res) {
+  const personaId = Number(req.params.id);
+
+  if (!Number.isInteger(personaId) || personaId < 1) {
+    return res.status(400).json({ message: 'El identificador de la persona no es válido.' });
+  }
+
+  try {
+    const [personas] = await pool.execute('SELECT id FROM personas WHERE id = ?', [personaId]);
+
+    if (!personas.length) {
+      return res.status(404).json({ message: 'La persona no existe.' });
+    }
+
+    const [rows] = await pool.execute(
+      `SELECT id, persona_id, estado, nota, fecha_cambio
+       FROM estado_historial
+       WHERE persona_id = ?
+       ORDER BY fecha_cambio DESC, id DESC`,
+      [personaId]
+    );
+
+    return res.status(200).json(rows);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'No se pudo cargar el historial.' });
+  }
 }
 
 async function getPersonas(req, res) {
@@ -195,5 +292,7 @@ async function exportPersonas(req, res) {
 
 module.exports = {
   getPersonas,
-  exportPersonas
+  exportPersonas,
+  updateEstado,
+  getEstadoHistorial
 };

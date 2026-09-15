@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#121a21" />
   <title>Registro Iglesia</title>
   <link rel="icon" type="image/png" href="/img/starchurch.png" />
   <link rel="stylesheet" href="/css/styles.css" />
@@ -11,14 +12,14 @@
   <main class="container">
     <section class="card">
       <header class="card-header">
-        <img src="img/NorthStar+Star-color-removebg-preview.png" alt="North Star" class="brand-mark" />
+        <img src="/img/NorthStar+Star-color-removebg-preview.png" alt="North Star" class="brand-mark" />
         <div>
           <h1>Registro de interés</h1>
           <p class="subtitle">Gracias por visitarnos. Completa tus datos para que el equipo pueda darte seguimiento.</p>
         </div>
         <a href="/login.html" class="home-link" aria-label="Ir al login" title="Ir al login">⌂</a>
       </header>
- 
+
       <div class="share-box">
         <div>
           <strong>Link para compartir</strong>
@@ -29,31 +30,31 @@
           <a href="/qr.html" class="secondary-btn view-qr-btn" target="_blank" rel="noopener noreferrer">Ver código QR</a>
         </div>
       </div>
- 
+
       <form id="registroForm" class="form-grid">
         <label>
           Nombre completo
-          <input type="text" name="nombre_completo" required />
+          <input type="text" name="nombre_completo" required autocomplete="name" autocapitalize="words" placeholder="Ej. María López" />
         </label>
- 
+
         <label>
           Correo electrónico
-          <input type="email" name="correo" required />
+          <input type="email" name="correo" required autocomplete="email" inputmode="email" placeholder="nombre@correo.com" />
         </label>
 
         <label>
           Teléfono (opcional)
-          <input type="tel" name="telefono" placeholder="Ej. +34 612 345 678" />
+          <input type="tel" name="telefono" autocomplete="tel" inputmode="tel" placeholder="Ej. +34 612 345 678" />
         </label>
- 
+
         <label>
           Código postal
-          <input type="text" name="codigo_postal" required />
+          <input type="text" name="codigo_postal" required autocomplete="postal-code" inputmode="numeric" placeholder="Ej. 28001" />
         </label>
- 
+
         <label>
           Edad
-          <input type="number" name="edad" min="1" max="120" required />
+          <input type="number" name="edad" min="1" max="120" required inputmode="numeric" placeholder="Ej. 32" />
         </label>
 
         <label>
@@ -65,7 +66,7 @@
           Voluntario
           <input type="text" name="voluntario" placeholder="Ej. Equipo de atención" />
         </label>
- 
+
         <label class="full-width">
           ¿En qué evento nos conociste? (opcional)
           <textarea name="evento_descripcion" rows="4" placeholder="Ej. Jornada de puertas abiertas, evento comunitario..."></textarea>
@@ -84,17 +85,18 @@
             </label>
           </div>
         </div>
- 
+
         <button type="submit" class="primary-btn">Enviar registro</button>
- 
+
         <p class="privacy-note">🔒 Tus datos son confidenciales y solo se usan para el seguimiento pastoral de tu iglesia.</p>
       </form>
- 
+
       <p id="mensaje" class="mensaje" aria-live="polite"></p>
     </section>
   </main>
- 
+
   <script src="/config.js"></script>
   <script src="/js/registro.js"></script>
+  <script src="/js/ui.js"></script>
 </body>
 </html>

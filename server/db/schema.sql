@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS personas (
   voluntario VARCHAR(150) NULL,
   reconciliacion BOOLEAN DEFAULT FALSE,
   aceptar_cristo BOOLEAN DEFAULT FALSE,
+  estado_actual VARCHAR(100) NULL,
   fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -34,3 +35,15 @@ ALTER TABLE personas ADD COLUMN IF NOT EXISTS iglesia VARCHAR(150) NULL;
 ALTER TABLE personas ADD COLUMN IF NOT EXISTS voluntario VARCHAR(150) NULL;
 ALTER TABLE personas ADD COLUMN IF NOT EXISTS reconciliacion BOOLEAN DEFAULT FALSE;
 ALTER TABLE personas ADD COLUMN IF NOT EXISTS aceptar_cristo BOOLEAN DEFAULT FALSE;
+ALTER TABLE personas ADD COLUMN IF NOT EXISTS estado_actual VARCHAR(100) NULL;
+
+CREATE TABLE IF NOT EXISTS estado_historial (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  persona_id INT NOT NULL,
+  estado VARCHAR(100) NOT NULL,
+  nota TEXT NULL,
+  fecha_cambio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (persona_id) REFERENCES personas(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_estado_historial_persona ON estado_historial(persona_id);

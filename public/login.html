@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#121a21" />
   <title>Login del panel</title>
   <link rel="icon" type="image/png" href="/img/starchurch.png" />
   <link rel="stylesheet" href="/css/styles.css" />
@@ -11,18 +12,25 @@
   <main class="container compact">
     <section class="card">
       <header class="card-header">
-        <h1>Acceso al panel</h1>
+        <img src="/img/NorthStar+Star-color-removebg-preview.png" alt="North Star" class="brand-mark" />
+        <div>
+          <h1>Acceso al panel</h1>
+          <p class="subtitle">Ingresa con tu cuenta del equipo.</p>
+        </div>
         <a href="/registro.html" class="home-link" aria-label="Volver al registro" title="Volver al registro">⌂</a>
       </header>
       <form id="loginForm" class="form-grid">
-        <label>
+        <label class="full-width">
           Correo electrónico
-          <input type="email" name="email" required />
+          <input type="email" name="email" required autocomplete="username" inputmode="email" placeholder="nombre@correo.com" />
         </label>
 
-        <label>
+        <label class="full-width">
           Contraseña
-          <input type="password" name="password" required />
+          <span class="password-field">
+            <input type="password" name="password" required autocomplete="current-password" />
+            <button type="button" class="password-toggle" data-ui-toggle="password" aria-label="Mostrar contraseña" aria-pressed="false">Mostrar</button>
+          </span>
         </label>
 
         <button type="submit" class="primary-btn">Iniciar sesión</button>
@@ -37,5 +45,6 @@
   </main>
 
   <script src="/js/login.js"></script>
+  <script src="/js/ui.js"></script>
 </body>
 </html>

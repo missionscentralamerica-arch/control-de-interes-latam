@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#121a21" />
   <title>Dashboard</title>
   <link rel="icon" type="image/png" href="/img/starchurch.png" />
   <link rel="stylesheet" href="/css/styles.css" />
@@ -48,7 +49,7 @@
 
         <label>
           Código postal
-          <input type="text" id="codigoPostal" placeholder="Ej. 28001" />
+          <input type="text" id="codigoPostal" inputmode="numeric" placeholder="Ej. 28001" />
         </label>
 
         <label>
@@ -79,6 +80,13 @@
           <input type="text" id="voluntario" placeholder="Ej. Equipo de apoyo" />
         </label>
 
+        <label>
+          Estado
+          <select id="estado">
+            <option value="">Todos</option>
+          </select>
+        </label>
+
         <button id="applyFiltersBtn" class="primary-btn">Aplicar filtros</button>
       </div>
 
@@ -96,6 +104,7 @@
               <th>Voluntario</th>
               <th>Reconciliación</th>
               <th>Aceptar a Cristo</th>
+              <th>Estado</th>
               <th>Fecha</th>
             </tr>
           </thead>
@@ -106,7 +115,39 @@
     </section>
   </main>
 
+  <div id="estadoModal" class="modal-backdrop" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="estadoModalTitle">
+      <div class="modal-header">
+        <div>
+          <p class="modal-kicker">Seguimiento</p>
+          <h2 id="estadoModalTitle">Actualizar estado</h2>
+        </div>
+        <button type="button" id="closeEstadoModalBtn" class="icon-btn" aria-label="Cerrar">×</button>
+      </div>
+
+      <form id="estadoForm" class="form-grid">
+        <input type="hidden" id="estadoPersonaId" />
+        <label class="full-width">
+          Estado actual
+          <select id="nuevoEstado" required></select>
+        </label>
+        <label class="full-width">
+          Nota (opcional)
+          <textarea id="notaEstado" rows="3" maxlength="5000" placeholder="Añade contexto para el próximo seguimiento..."></textarea>
+        </label>
+        <button type="submit" class="primary-btn full-width">Guardar cambio de estado</button>
+      </form>
+
+      <div class="history-section">
+        <h3>Historial de estados</h3>
+        <div id="estadoHistorial" class="history-list" aria-live="polite"></div>
+      </div>
+      <p id="estadoMensaje" class="mensaje" aria-live="polite"></p>
+    </section>
+  </div>
+
   <script src="/config.js"></script>
   <script src="/js/dashboard.js"></script>
+  <script src="/js/ui.js"></script>
 </body>
 </html>

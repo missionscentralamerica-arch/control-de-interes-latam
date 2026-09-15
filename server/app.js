@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const authRoutes = require('./routes/auth.routes');
 const registroRoutes = require('./routes/registro.routes');
 const personasRoutes = require('./routes/personas.routes');
+const { estadosProgresivos, estadosEspeciales } = require('./config/estados');
 
 const app = express();
 
@@ -18,7 +19,7 @@ function getPublicRegistrationUrl(req) {
 app.get('/config.js', (req, res) => {
   const registrationUrl = getPublicRegistrationUrl(req);
 
-  res.type('application/javascript').send(`window.__APP_CONFIG__ = ${JSON.stringify({ registrationUrl })};`);
+  res.type('application/javascript').send(`window.__APP_CONFIG__ = ${JSON.stringify({ registrationUrl, estadosProgresivos, estadosEspeciales })};`);
 });
 
 app.get('/api/qr', async (req, res) => {
